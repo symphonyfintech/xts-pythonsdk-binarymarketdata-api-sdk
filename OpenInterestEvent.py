@@ -10,8 +10,6 @@ class OpenInterest():
         count += 8
         if (messageVersion >= ApplicationMessageVersion.Version_1_0_1_2983.value): 
             sequenceNumber =reader.read_uint64()
-            print("sequenceNumber==" ,sequenceNumber )
-
             count += 8
             SkipBytes = reader.read_int32()
             count += 4
