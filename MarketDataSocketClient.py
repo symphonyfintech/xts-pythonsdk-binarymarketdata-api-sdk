@@ -47,29 +47,7 @@ class MDSocket_io(socketio.Client):
 
         self.sid.on('connect', self.on_connect)
         self.sid.on('message', self.on_message)
-
-        """Similarly implement partial json full and binary json full."""
-        self.sid.on('1501-json-full', self.on_message1501_json_full)
-        self.sid.on('1501-json-partial', self.on_message1501_json_partial)
-
-        self.sid.on('1502-json-full', self.on_message1502_json_full)
-        self.sid.on('1502-json-partial', self.on_message1502_json_partial)
-
-        self.sid.on('1505-json-full', self.on_message1505_json_full)
-        self.sid.on('1505-json-partial', self.on_message1505_json_partial)
-
-        self.sid.on('1507-json-full', self.on_message1507_json_full)
-
-        self.sid.on('1510-json-full', self.on_message1510_json_full)
-        self.sid.on('1510-json-partial', self.on_message1510_json_partial)
-
-        self.sid.on('1512-json-full', self.on_message1512_json_full)
         self.sid.on('xts-binary-packet', self.on_xts_binary_packet)
-
-        self.sid.on('1512-json-partial', self.on_message1512_json_partial)
-
-      
-
         self.sid.on('disconnect', self.on_disconnect)
 
         """Get the root url from config file"""
@@ -131,56 +109,9 @@ class MDSocket_io(socketio.Client):
         """On receiving message"""
         print('I received a message!' + data)
 
-    def on_message1502_json_full(self, data):
-        """On receiving message code 1502 full"""
-        print('I received a 1502 Market depth message!' + data)
-
-    def on_message1507_json_full(self, data):
-        """On receiving message code 1507 full"""
-        print('I received a 1507 MarketStatus message!' + data)
-        
-    def on_message1512_json_full(self, data):
-        """On receiving message code 1512 full"""
-        print('I received a 1512 LTP message!' + data)     
-
-    def on_message1505_json_full(self, data):
-        """On receiving message code 1505 full"""
-        print('I received a 1505 Candle data message!' + data)
-
-    def on_message1510_json_full(self, data):
-        """On receiving message code 1510 full"""
-        print('I received a 1510 Open interest message!' + data)
-
-    def on_message1501_json_full(self, data):
-        """On receiving message code 1501 full"""
-        print('I received a 1501 Level1,Touchline message!' + data)
-
-    def on_message1502_json_partial(self, data):
-        """On receiving message code 1502 partial"""
-        print('I received a 1502 partial message!' + str(data))
-
     def on_xts_binary_packet(self, data):
         print('I received a on_xts_binary_packet!' + data)
- 
-    def on_message1512_json_partial(self, data):
-        """On receiving message code 1512 partial"""
-        print('I received a 1512 LTP message!' + data)
-
-    def on_message1505_json_partial(self, data):
-        """On receiving message code 1505 partial"""
-        print('I received a 1505 Candle data message!' + data)
-
-    def on_message1510_json_partial(self, data):
-        """On receiving message code 1510 partial"""
-        print('I received a 1510 Open interest message!' + data)
-
-    def on_message1501_json_partial(self, data):
-        """On receiving message code 1501 partial"""
-        now = datetime.now()
-        today = now.strftime("%H:%M:%S")
-        print(today, 'in main 1501 partial Level1,Touchline message!' + data + ' \n')
-
-   
+    
     def on_disconnect(self):
         """Disconnected from the socket"""
         print('Market Data Socket disconnected!')
