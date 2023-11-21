@@ -35,6 +35,8 @@ def on_connect():
 def on_message(data):
     print('I received a message!')
 
+
+
 def on_xts_binary_packet(data):
     try:
         a = bytearray(data)   
@@ -43,66 +45,65 @@ def on_xts_binary_packet(data):
         currentsize = 0
         isnextpacket = True
         datalen=len(a)
+        packetcount = 0
         br = BinaryReader(data)
-        isGzipCompressed = br.read_int8()
-        offset=offset+1
         packetSize = 0
         uncompressedPacketSize = 0
         nextdata = a
-        if(datalen > packetSize):
-           if (isGzipCompressed == 1): 
-                while (isnextpacket): 
-                    nextdata = a[offset:datalen]
-                    br = BinaryReader(nextdata)
-                    packetSize = br.read_uint16()
-                    messageCode = str(br.read_uint16())
-                    exchangeSegment = br.read_int16()
-                    exchangeInstrumentID = br.read_int32()
-                    bookType = br.read_int16()
-                    marketType = br.read_int16()
-                    uncompressedPacketSize = br.read_uint16()
-                    compressedPacketSize = br.read_uint16()
-                    offset=offset+16
-                    #offset += 17
-                    filteredByteArray = a[offset:(offset + uncompressedPacketSize)]
-                    inflate = pako_inflate_raw(filteredByteArray)
-                    result = bytearray(inflate)
-                    r = BinaryReader(result)
-                    currentsize = packetSize + offset
-                    if (currentsize < len(a)): 
-                                isnextpacket = True
-                                offset = currentsize
-                    else: isnextpacket = False
-                    if (len(result) > 16) :
-                        messageCode = str(r.read_uint16())
-                        if ("1501" in messageCode) :
-                            Touchline.deserialize(r,count)
-                        elif ("1502" in messageCode):
-                            MarketDepthEvent.deserialize(r,count)
-                        elif ("1510" in messageCode):
-                            OpenInterest.deserialize(r,count)
-                        elif ("1512" in messageCode):
-                            LTPEvent.deserialize(r,count)
-        else:
-            count = offset
-            while (isnextpacket and datalen.size > 1 ): 
-                messageCode = str(r.read_uint16())
+        while (isnextpacket): 
+            nextdata = a[offset:datalen]
+            br = BinaryReader(nextdata)
+            isGzipCompressed = br.read_int8()
+            offset=offset+1
+            if (isGzipCompressed == 1): 
+                nextdata = a[offset:datalen]
+                br = BinaryReader(nextdata)
+                messageCode = br.read_uint16()
                 exchangeSegment = br.read_int16()
                 exchangeInstrumentID = br.read_int32()
                 bookType = br.read_int16()
                 marketType = br.read_int16()
                 uncompressedPacketSize = br.read_uint16()
                 compressedPacketSize = br.read_uint16()
-                if ("1501" in messageCode) :
+                offset += 16
+                filteredByteArray = a[offset:(offset + compressedPacketSize)]
+                inflate = pako_inflate_raw(filteredByteArray)
+                result = bytearray(inflate)
+                r = BinaryReader(result)
+                currentsize = compressedPacketSize  + offset
+                if (currentsize < len(a)): 
+                    isnextpacket = True
+                    packetcount = 1
+                    offset = currentsize
+                else: isnextpacket = False
+                messageCode = str(r.read_uint16())
+                if ("1501" in str(messageCode)) :
                     Touchline.deserialize(r,count)
-                elif ("1502" in messageCode):
+                elif ("1502" in str(messageCode)):
                     MarketDepthEvent.deserialize(r,count)
-                elif ("1510" in messageCode):
+                elif ("1510" in str(messageCode)):
                     OpenInterest.deserialize(r,count)
-                
-
-
-
+                elif ("1512" in messageCode):
+                    LTPEvent.deserialize(r,count)
+            elif (isGzipCompressed == 0): 
+                count = offset
+                while (isnextpacket and datalen > 1 ): 
+                    messageCode = str(r.read_uint16())
+                    exchangeSegment = br.read_int16()
+                    exchangeInstrumentID = br.read_int32()
+                    bookType = br.read_int16()
+                    marketType = br.read_int16()
+                    uncompressedPacketSize = br.read_uint16()
+                    compressedPacketSize = br.read_uint16()
+                    count = offset;
+                    if ("1501" in messageCode) :
+                        Touchline.deserialize(r,count)
+                    elif ("1502" in messageCode):
+                        MarketDepthEvent.deserialize(r,count)
+                    elif ("1510" in messageCode):
+                        OpenInterest.deserialize(r,count)
+                    elif ("1510" in messageCode):
+                        OpenInterest.deserialize(r,count)
     except Exception as e:
         print(e)
 
