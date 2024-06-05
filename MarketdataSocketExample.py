@@ -88,6 +88,7 @@ def on_xts_binary_packet(data):
             elif (isGzipCompressed == 0): 
                 count = offset
                 while (isnextpacket and datalen > 1 ): 
+                    nextdata = a[offset:datalen]
                     messageCode = str(r.read_uint16())
                     exchangeSegment = br.read_int16()
                     exchangeInstrumentID = br.read_int32()
