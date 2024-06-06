@@ -86,25 +86,27 @@ def on_xts_binary_packet(data):
                 elif ("1512" in messageCode):
                     LTPEvent.deserialize(r,count)
             elif (isGzipCompressed == 0): 
-                count = offset
-                while (isnextpacket and datalen > 1 ): 
-                    nextdata = a[offset:datalen]
-                    messageCode = str(r.read_uint16())
-                    exchangeSegment = br.read_int16()
-                    exchangeInstrumentID = br.read_int32()
-                    bookType = br.read_int16()
-                    marketType = br.read_int16()
-                    uncompressedPacketSize = br.read_uint16()
-                    compressedPacketSize = br.read_uint16()
-                    count = offset;
-                    if ("1501" in messageCode) :
-                        Touchline.deserialize(r,count)
-                    elif ("1502" in messageCode):
-                        MarketDepthEvent.deserialize(r,count)
-                    elif ("1510" in messageCode):
-                        OpenInterest.deserialize(r,count)
-                    elif ("1510" in messageCode):
-                        OpenInterest.deserialize(r,count)
+                messageCode = str(br.read_uint16())
+                exchangeSegment = br.read_int16()
+                exchangeInstrumentID = br.read_int32()
+                bookType = br.read_int16()
+                marketType = br.read_int16()
+                uncompressedPacketSize = br.read_uint16()
+                compressedPacketSize = br.read_uint16()
+                offset += 14
+                count = offset                
+                if ("1501" in messageCode) :
+                    Touchline.deserialize(br,count)
+                elif ("1502" in messageCode):
+                    MarketDepthEvent.deserialize(br,count)
+                elif ("1510" in messageCode):
+                    OpenInterest.deserialize(br,count)
+                currentsize = offset+ uncompressedPacketSize  
+                if (currentsize < len(a)): 
+                    isnextpacket = True
+                    packetcount = 1
+                    offset = currentsize 
+                else: isnextpacket = False
     except Exception as e:
         print(e)
 
